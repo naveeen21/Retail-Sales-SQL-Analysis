@@ -5,6 +5,9 @@ select * from Transactions;
 
 --***************************** DATA PREPARATION AND UNDERSTANDING ***************************--
 
+---Q1 BEGIN------------------------------------------------------------
+-- What is the total number of rows in each of the 3 tables in the database? 
+
 SELECT 'CUSTOMER' AS TABLE_NAME, COUNT(*) AS TOTAL_RECORD FROM Customer
 UNION ALL
 SELECT 'PROD_CAT_INFO' AS TABLE_NAME,COUNT(*) AS TOTAL_RECORD FROM  PROD_CAT_INFO
@@ -19,6 +22,7 @@ UNION ALL
 SELECT 'TRANSACTIONS' AS TABLE_NAME,COUNT (*) AS TOTAL_RECORD FROM TRANSACTIONS) AS T1;
 
 ---Q2 BEGIN------------------------------
+-- What is the total number of transactions that have a return? 
 
 SELECT 'RETURN' AS [TRANSACTION], COUNT(CAST(Qty AS FLOAT)) AS TOTAL_RETURN_TRANSACTION FROM( SELECT 
 QTY
@@ -26,6 +30,8 @@ FROM TRANSACTIONS
 WHERE QTY < 0) AS T1;
 
 ---Q3 BEGIN------------------------------------------------------------------------------------
+-- As you would have noticed, the dates provided across the datasets are not in a correct format. 
+-- As first steps, pls convert the date variables into valid date formats before proceeding ahead.
 
 SELECT *,
 CONVERT(DATE, DOB, 105) AS NEW_FORMAT_DOB
@@ -36,6 +42,8 @@ CONVERT(DATE, tran_date, 105) AS NEW_FORMAT_TRAN_DATE
 FROM TRANSACTIONS;
 
 ---Q4 BEGIN------------------------------------------------------------------------------------
+-- What is the time range of the transaction data available for analysis? 
+--Show the output in number of days, months and years simultaneously in different columns
 
 SELECT 
 MIN(CONVERT(DATE, tran_date, 105)) AS BEGIN_TRANSACTION_DATE,
@@ -46,6 +54,7 @@ DATEDIFF(YEAR, MIN(CONVERT(DATE, tran_date, 105)), MAX(CONVERT(DATE, tran_date, 
 FROM TRANSACTIONS;
 
 ---Q5 BEGIN------------------------------------------------------------------------------------
+-- Which product category does the sub-category “DIY” belong to?
 
 SELECT PROD_CAT FROM 
 PROD_CAT_INFO
@@ -56,14 +65,15 @@ WHERE PROD_SUBCAT = 'DIY';
 
 
 ---Q1 BEGIN------------------------------------------------------------------------------------
-
+-- Which channel is most frequently used for transactions? 
+ 
 SELECT Top 1 STORE_TYPE AS CHANNELS, COUNT(STORE_TYPE) AS TOTAL_TRANSACTIONS
 FROM TRANSACTIONS
 GROUP BY STORE_TYPE
 ORDER BY TOTAL_TRANSACTIONS DESC;
 
 ---Q2 BEGIN------------------------------------------------------------------------------------
-
+-- What is the count of Male and Female customers in the database? 
 SELECT 'MALE' AS GENDER, COUNT(GENDER) AS TOTAL_COUNT
 FROM Customer
 WHERE Gender='M'
@@ -73,7 +83,7 @@ FROM Customer
 WHERE Gender='F';
 
 ---Q3 BEGIN------------------------------------------------------------------------------------
-
+-- From which city do we have the maximum number of customers and how many? 
 SELECT TOP 1
 city_code, COUNT(CITY_CODE) AS MAX_CUSTOMER
 FROM Customer
@@ -81,6 +91,7 @@ GROUP BY city_code
 ORDER BY MAX_CUSTOMER DESC;
 
 ---Q4 BEGIN------------------------------------------------------------------------------------
+-- How many sub-categories are there under the Books category? 
 
 SELECT 'BOOKS' AS CATEGORY, COUNT(PROD_SUBCAT) AS COUNT_OF_SUB_CAT_OF_BOOK
 FROM 
@@ -88,6 +99,7 @@ PROD_CAT_INFO
 WHERE PROD_CAT LIKE 'BOO%';
 
 ---Q5 BEGIN------------------------------------------------------------------------------------
+-- What is the maximum quantity of products ever ordered? 
  
 SELECT TOP 1
 TA.prod_cat_code AS PRODUCT_CATEGORY_CODE, prod_cat AS PRODUCT_CATEGORY, 
@@ -100,6 +112,7 @@ ORDER BY MAX_QUANTITY DESC;
 
 
 ---Q6 BEGIN------------------------------------------------------------------------------------
+-- What is the net total revenue generated in categories Electronics and Books? 
 
 SELECT PCI.prod_cat AS PRODUCT_CATEGORY, SUM(CAST(TOTAL_AMT AS FLOAT)) AS TOTAL_REVENUE FROM 
 TRANSACTIONS AS TR
@@ -110,6 +123,7 @@ GROUP BY PCI.prod_cat;
 
 
 ---Q7 BEGIN------------------------------------------------------------------------------------
+-- How many customers have >10 transactions with us, excluding returns? 
 
 SELECT CUST_ID AS CUSTOMER_ID, COUNT(total_amt) AS TOTAL_NUMBER_OF_TRANSACTIONS
 FROM
@@ -120,6 +134,7 @@ HAVING COUNT(total_amt)>10;
 
 
 ---Q8 BEGIN-----------------------------------------------------------------------------------
+-- What is the combined revenue earned from the “Electronics” & “Clothing” categories, from “Flagship stores”? 
 
 SELECT 
 prod_cat AS PRODUCT_CATEGORY, SUM(CAST(TOTAL_AMT AS FLOAT)) AS TOTAL_AMT
@@ -141,6 +156,7 @@ GROUP BY prod_cat) AS T1 ;
 
 
 ---Q9 BEGIN-----------------------------------------------------------------------------------
+-- What is the total revenue generated from “Male” customers in “Electronics” category? Output should display total revenue by prod sub-cat. 
 
 SELECT GENDER, PROD_CAT, PROD_SUBCAT,SUM(CAST(TOTAL_AMT AS FLOAT)) 
 AS TOTAL_REVENUE FROM Customer AS C
@@ -153,6 +169,7 @@ GROUP BY GENDER, PROD_CAT, PROD_SUBCAT;
 
 
 ---Q10 BEGIN-----------------------------------------------------------------------------------
+-- What is percentage of sales and returns by product sub category; display only top 5 sub categories in terms of sales? 
 
 SELECT TOP 5 prod_subcat AS PRODUCT_SUB_CATEGORY, SUM(CAST(TOTAL_AMT AS FLOAT)) AS TOTAL_SALES,
 SUM(CAST(TOTAL_AMT AS FLOAT))/(SELECT SUM(CAST(TOTAL_AMT AS FLOAT)) FROM Transactions)
@@ -168,6 +185,8 @@ ORDER BY TOTAL_SALES DESC;
 
 
 ---Q11 BEGIN---------------------------------------------------------------------------------
+-- For all customers aged between 25 to 35 years find what is the net total revenue generated by these consumers 
+-- in last 30 days of transactions from max transaction date available in the data?
 
 SELECT CUSTOMER_ID, DATEDIFF(YEAR, CONVERT(DATE, DOB, 105), GETDATE()) AS CUST_AGE, 
 CONVERT(DATE, TRAN_DATE, 105) AS TRANSACTION_DATE,
@@ -184,6 +203,7 @@ CONVERT(DATE, TRAN_DATE, 105);
 
 
 ---Q12 BEGIN---------------------------------------------------------------------------------
+-- Which product category has seen the max value of returns in the last 3 months of transactions? 
 
 SELECT Top 1 PCI.prod_cat AS PRODUCT_CATEGORY, 
 SUM(CAST(TOTAL_AMT AS FLOAT)) AS TOTAL_VALUE_OF_RETURN
@@ -198,6 +218,7 @@ ORDER BY TOTAL_VALUE_OF_RETURN;
 
 
 ---Q13 BEGIN---------------------------------------------------------------------------------
+-- Which store-type sells the maximum products; by value of sales amount and by quantity sold? 
 
 SELECT TOP 1 Store_type, SUM(CAST(TOTAL_AMT AS FLOAT)) AS TOTAL_SALE_AMT,
 COUNT(prod_cat) AS QUANTITY_OF_SALE
@@ -210,6 +231,7 @@ ORDER BY TOTAL_SALE_AMT DESC, QUANTITY_OF_SALE DESC;
 
 
 ---Q14 BEGIN---------------------------------------------------------------------------------
+-- What are the categories for which average revenue is above the overall average. 
 
 SELECT 
 prod_cat AS PRODUCT_CATEGORY, AVG(CAST(TOTAL_AMT AS FLOAT)) AS SALES_MORE_THAN_AVG
@@ -223,6 +245,7 @@ HAVING AVG(CAST(TOTAL_AMT AS FLOAT)) >
 
 
 ---Q15 BEGIN---------------------------------------------------------------------------------
+-- Find the average and total revenue by each subcategory for the categories which are among top 5 categories in terms of quantity sold.
 
 SELECT * FROM (SELECT ROW_NUMBER() OVER(ORDER BY COUNT (prod_cat) DESC ) AS RNUM, prod_cat, 
 prod_subcat,
@@ -234,3 +257,6 @@ Transactions AS TR
 INNER JOIN prod_cat_info AS PCI
 ON TR.prod_cat_code=PCI.prod_cat_code AND TR.prod_subcat_code=PCI.prod_sub_cat_code
 GROUP BY prod_cat, prod_subcat) AS T1 WHERE RNUM BETWEEN 1 AND 5; 
+
+
+-------------------------------------END---------------------------------------------------------------
